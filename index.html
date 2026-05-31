@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Hóa Phân Tích</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --danger: #f85149;
+    --warning: #d29922;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --correct: #1a4731;
+    --correct-border: #3fb950;
+    --wrong: #3d1f22;
+    --wrong-border: #f85149;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* HEADER */
+  header {
+    width: 100%;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #58a6ff, #3fb950);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--text);
+  }
+
+  .logo-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    position: sticky;
+    top: 69px;
+    z-index: 99;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #58a6ff, #3fb950);
+    transition: width 0.4s ease;
+  }
+
+  /* MAIN CONTAINER */
+  .container {
+    width: 100%;
+    max-width: 780px;
+    padding: 32px 20px 80px;
+  }
+
+  /* SCREEN: START */
+  #start-screen {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .start-badge {
+    display: inline-block;
+    background: rgba(88,166,255,0.12);
+    border: 1px solid rgba(88,166,255,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .start-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 6vw, 52px);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .start-title em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .start-desc {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+  }
+
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 36px;
+    text-align: left;
+  }
+
+  .topic-tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+  }
+
+  .topic-tag span { font-size: 16px; }
+
+  .btn-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #58a6ff, #1f6feb);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 36px;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 20px rgba(88,166,255,0.3);
+  }
+
+  .btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(88,166,255,0.4);
+  }
+
+  /* SCREEN: QUIZ */
+  #quiz-screen { display: none; }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .q-counter {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .q-counter strong {
+    color: var(--text);
+  }
+
+  .q-topic {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-number {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .question-text {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* OPTIONS */
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all 0.15s ease;
+    line-height: 1.5;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(88,166,255,0.06);
+  }
+
+  .option-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .option-btn.correct {
+    background: var(--correct);
+    border-color: var(--correct-border);
+    color: #aff3c0;
+  }
+
+  .option-btn.correct .option-label {
+    background: var(--correct-border);
+    color: #0d1117;
+  }
+
+  .option-btn.wrong {
+    background: var(--wrong);
+    border-color: var(--wrong-border);
+    color: #ffb3b3;
+  }
+
+  .option-btn.wrong .option-label {
+    background: var(--wrong-border);
+    color: white;
+  }
+
+  .option-btn.reveal-correct {
+    background: rgba(63,185,80,0.08);
+    border-color: rgba(63,185,80,0.4);
+    color: #3fb950;
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  /* FEEDBACK */
+  .feedback-box {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    display: none;
+  }
+
+  .feedback-box.correct {
+    background: var(--correct);
+    border: 1px solid var(--correct-border);
+    color: #aff3c0;
+    display: block;
+  }
+
+  .feedback-box.wrong {
+    background: var(--wrong);
+    border: 1px solid var(--wrong-border);
+    color: #ffb3b3;
+    display: block;
+  }
+
+  .feedback-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* NAV BUTTONS */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #58a6ff, #1f6feb);
+    color: white;
+    box-shadow: 0 2px 12px rgba(88,166,255,0.2);
+  }
+
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(88,166,255,0.3); }
+
+  .btn-ghost {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .btn-ghost:hover { border-color: var(--text-muted); color: var(--text); }
+
+  .score-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .score-pill .val {
+    font-weight: 700;
+    color: var(--accent2);
+  }
+
+  /* SCREEN: RESULT */
+  #result-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 0;
+    animation: slideIn 0.4s ease;
+  }
+
+  .result-emoji {
+    font-size: 64px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+
+  .result-sub {
+    color: var(--text-muted);
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+
+  .result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .stat-val {
+    font-size: 36px;
+    font-weight: 800;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn-restart {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #3fb950, #238636);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 36px;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 4px 20px rgba(63,185,80,0.25);
+  }
+
+  .btn-restart:hover { transform: translateY(-2px); }
+
+  @media (max-width: 500px) {
+    .result-stats { grid-template-columns: 1fr 1fr; }
+    .topics-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">⚗️</div>
+  <span class="logo-text">HóaPhânTích</span>
+  <span class="logo-sub">Dược — Hóa Phân Tích</span>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+</div>
+
+<div class="container">
+
+  <!-- START SCREEN -->
+  <div id="start-screen">
+    <div class="start-badge">📚 Ôn tập trắc nghiệm</div>
+    <h1 class="start-title">Hóa <em>Phân Tích</em><br>Định Lượng</h1>
+    <p class="start-desc">Bộ câu hỏi tổng hợp từ các bài thực hành: chuẩn độ axit-bazo, complexon, kết tủa, oxi hóa khử và phân tích mẫu thực tế.</p>
+    <div class="topics-grid">
+      <div class="topic-tag"><span>🧪</span> Chuẩn độ Axit-Bazo</div>
+      <div class="topic-tag"><span>🔬</span> Phương pháp Complexon</div>
+      <div class="topic-tag"><span>⚡</span> Chuẩn độ Oxi-Khử</div>
+      <div class="topic-tag"><span>🧲</span> Phương pháp Kết Tủa</div>
+      <div class="topic-tag"><span>🏭</span> Phân tích Xi Măng</div>
+      <div class="topic-tag"><span>🥇</span> Phân tích Đồng Thau</div>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">
+      Bắt đầu làm bài →
+    </button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quiz-screen">
+    <div class="q-meta">
+      <span class="q-counter">Câu <strong id="q-num">1</strong> / <strong id="q-total">30</strong></span>
+      <span class="q-topic" id="q-topic">Bài 1</span>
+    </div>
+
+    <div class="question-card">
+      <div class="question-number" id="q-number-label">Câu hỏi 1</div>
+      <div class="question-text" id="q-text"></div>
+    </div>
+
+    <div class="options-list" id="options-list"></div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div id="feedback-body"></div>
+    </div>
+
+    <div class="nav-row">
+      <div class="score-pill">
+        ✓ <span class="val" id="score-val">0</span> đúng
+      </div>
+      <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" style="display:none">
+        Câu tiếp theo →
+      </button>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="result-screen">
+    <span class="result-emoji" id="result-emoji">🎉</span>
+    <h2 class="result-title" id="result-title">Hoàn thành!</h2>
+    <p class="result-sub" id="result-sub">Xem kết quả của bạn bên dưới</p>
+    <div class="result-stats">
+      <div class="stat-card">
+        <span class="stat-val" id="stat-score" style="color:#3fb950">0</span>
+        <span class="stat-label">Câu đúng</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="stat-wrong" style="color:#f85149">0</span>
+        <span class="stat-label">Câu sai</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="stat-pct" style="color:#58a6ff">0%</span>
+        <span class="stat-label">Điểm số</span>
+      </div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">🔄 Làm lại từ đầu</button>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  // BÀI 1: AXIT-BAZO
+  {
+    topic: "Bài 1 – Axit-Bazo",
+    text: "Tại sao trong quá trình chuẩn độ xác định Aspirin (pKa=3,5) người ta phải chuẩn độ ngược?",
+    options: [
+      "Để đảm bảo chỉ có nhóm chức axit phản ứng",
+      "Do có nhóm este trong phân tử cũng có phản ứng với NaOH nhưng chậm",
+      "Do không có chất chỉ thị thích hợp cho phép chuẩn độ",
+      "Do phản ứng chậm không chọn lọc với duy nhất chất phân tích"
+    ],
+    answer: 1,
+    explanation: "Nhóm este trong phân tử Aspirin cũng có thể phản ứng với NaOH nhưng chậm hơn, nên phải chuẩn độ ngược để đảm bảo độ chính xác."
+  },
+  {
+    topic: "Bài 1 – Axit-Bazo",
+    text: "Để chuẩn bị dung dịch đệm pH = 5,5 nên dùng hỗn hợp của axit và muối nào sau đây?",
+    options: [
+      "NH4Cl và NH3 (pKa=9,25)",
+      "HCOOH và HCOONa (pKa=3,75)",
+      "CH3COOH và CH3COONa (pKa=4,75)",
+      "CH3COONH4"
+    ],
+    answer: 2,
+    explanation: "Dung dịch đệm CH3COOH/CH3COONa có pKa=4,75 phù hợp nhất để pha đệm pH=5,5 (gần pKa nhất trong các phương án)."
+  },
+  {
+    topic: "Bài 1 – Axit-Bazo",
+    text: "Không dùng NaOH 99,5% làm chất gốc trong phương pháp chuẩn độ axit-bazo vì:",
+    options: [
+      "Chất này chưa đủ độ tinh khiết nhưng lại bền cả ở dạng rắn và dung dịch",
+      "Dung dịch NaOH gây ăn da, khó pha chế",
+      "Chất này dễ bị hút ẩm và hấp thu CO₂ trong không khí, dung dịch bị thay đổi nồng độ khi bảo quản",
+      "Chất này có thành phần hóa học đúng với công thức xác định"
+    ],
+    answer: 2,
+    explanation: "NaOH dễ hút ẩm và hấp thụ CO₂ trong không khí làm thay đổi nồng độ dung dịch khi bảo quản nên không dùng làm chất gốc."
+  },
+  {
+    topic: "Bài 1 – Axit-Bazo",
+    text: "Công thức nào dùng để tính pH của dung dịch CH3COONa 0,01M (biết CH3COOH có pKa=4,75)?",
+    options: [
+      "[H⁺] = Ka(Ca/Cb)",
+      "[OH⁻] = Ka(Cb/Ca)",
+      "[OH⁻] = √(Kb·Cb)",
+      "[H⁺] = Ka(Ca/Cb)"
+    ],
+    answer: 2,
+    explanation: "CH3COONa là muối của axit yếu – bazơ mạnh, dung dịch có tính kiềm. Dùng công thức [OH⁻] = √(Kb·Cb) để tính pH."
+  },
+  {
+    topic: "Bài 1 – Axit-Bazo",
+    text: "Đường cong chuẩn độ trong chuẩn độ Axit-Bazo biểu diễn sự phụ thuộc của:",
+    options: [
+      "pH theo thể tích chất chuẩn",
+      "Nhiệt độ theo thể tích chất chuẩn",
+      "Thể của dung dịch theo nồng độ chất chuẩn",
+      "pH theo nồng độ chất chuẩn"
+    ],
+    answer: 0,
+    explanation: "Đường cong chuẩn độ axit-bazo biểu diễn sự phụ thuộc của pH theo thể tích chất chuẩn thêm vào."
+  },
+  {
+    topic: "Bài 1 – Axit-Bazo",
+    text: "Khi chuẩn độ CH3COOH bằng NaOH, có thể sử dụng chỉ thị nào?",
+    options: [
+      "Metyl da cam (pKa=4)",
+      "Metyl đỏ (pK=5)",
+      "Phenolphthalein (pKa=9)",
+      "Bromothymol xanh (pKa=7)"
+    ],
+    answer: 2,
+    explanation: "Điểm tương đương khi chuẩn độ CH3COOH/NaOH có pH > 7, nên dùng Phenolphthalein (đổi màu ở pH 8-10) là phù hợp nhất."
+  },
+
+  // BÀI 2: ĐA AXIT-BAZO
+  {
+    topic: "Bài 2 – Đa Axit-Bazo",
+    text: "Công thức tính pH tại điểm tương đương thứ nhất khi chuẩn độ Na₂CO₃ 0,1M bằng HCl (H₂CO₃ có pK₁=6,35; pK₂=10,32) là gì?",
+    options: [
+      "pH = ½pK₁ – ½logCa = 3,185",
+      "pH = (pK₁+pK₂)/2 = (6,35+10,32)/2 = 8,21",
+      "pH = 14 – log[Na₂CO₃] = 13",
+      "pH = –log[NaHCO₃]"
+    ],
+    answer: 1,
+    explanation: "Tại điểm tương đương thứ nhất tạo thành NaHCO₃ (chất lưỡng tính). pH = (pK₁+pK₂)/2 = (6,35+10,32)/2 = 8,21."
+  },
+  {
+    topic: "Bài 2 – Đa Axit-Bazo",
+    text: "Nồng độ chính xác của dung dịch H₂C₂O₄ thu được là bao nhiêu nếu cân 0,7862 gam H₂C₂O₄·2H₂O (M=126,066 g/mol) và định mức thành 250,0 ml?",
+    options: [
+      "0,02405 M",
+      "0,02494 M",
+      "0,025 M",
+      "0,0249457 M"
+    ],
+    answer: 1,
+    explanation: "C = 0,7862/126,066/0,250 = 0,02494 M (làm tròn 4 chữ số có nghĩa theo 250,0 và 0,7862)."
+  },
+  {
+    topic: "Bài 2 – Đa Axit-Bazo",
+    text: "Mệnh đề nào trong các mệnh đề sau đây là SAI khi nói về chuẩn độ điện thế?",
+    options: [
+      "Cần thêm dd chuẩn từ từ ở gần sát điểm tương đương",
+      "Không chuẩn dd có pH lớn hơn 11,5",
+      "Từ E thay đổi có thể tính được sự biến thiên pH của dung dịch",
+      "Có thể đo pH các dung dịch HCl 0,1M, NaOH 0,05M"
+    ],
+    answer: 3,
+    explanation: "Mệnh đề D sai – chuẩn độ điện thế không phải để đo pH đơn giản; đây là phương pháp xác định điểm tương đương."
+  },
+
+  // BÀI 3: COMPLEXON
+  {
+    topic: "Bài 3 – Complexon",
+    text: "Logarit hằng số bền của phức Bi³⁺ và Pb²⁺ với EDTA lần lượt là 27,8 và 18,0. Tại pH 2, αY4⁻ = 3,3.10⁻¹⁴; tại pH 5 αY4⁻ = 3,7.10⁻⁷. Nhận xét nào sau đây là đúng?",
+    options: [
+      "Có thể chuẩn độ Pb²⁺ ở pH=1",
+      "Chỉ có Bi³⁺ tạo phức với EDTA ở pH=3",
+      "Chỉ có Pb²⁺ tạo phức với EDTA tại pH=3",
+      "Có thể chuẩn độ cả Bi³⁺ và Pb²⁺ ở pH=3"
+    ],
+    answer: 1,
+    explanation: "Tại pH=3, với αY4⁻ rất nhỏ, chỉ phức Bi³⁺ (lgβ=27,8) đủ bền để tạo phức hoàn toàn, còn Pb²⁺ (lgβ=18,0) không đủ bền."
+  },
+  {
+    topic: "Bài 3 – Complexon",
+    text: "Điều kiện để xác định nồng độ dung dịch Zn²⁺ bằng phương pháp chuẩn độ complexon là:",
+    options: [
+      "Đệm pH=5 với chất chỉ thị murexit",
+      "Dung dịch axit pH=2-3 với chỉ thị axit sunfosalicilic",
+      "Đệm pH=10 với chất chỉ thị xylenol da cam",
+      "Đệm amoni pH=10 với chất chỉ thị ET-OO"
+    ],
+    answer: 3,
+    explanation: "Để xác định Zn²⁺ bằng complexon cần đệm amoni pH=10 với chỉ thị ET-OO (Eriochrome Black T)."
+  },
+  {
+    topic: "Bài 3 – Complexon",
+    text: "Chỉ thị murexit dạng tự do có màu tím, tạo phức màu vàng với Cu²⁺ (hoặc Ni²⁺) ở pH=8 và tạo phức màu hồng với Ca²⁺ ở pH=12. Câu nào sau đây là SAI?",
+    options: [
+      "Chuẩn độ trực tiếp Cu²⁺ mà EDTA trên buret thì màu thay đổi từ vàng sang tím",
+      "Chuẩn độ trực tiếp Cu²⁺ mà EDTA trên buret thì màu thay đổi từ vàng sang xanh tím",
+      "Có thể chuẩn độ trực tiếp Ca²⁺ với chỉ thị murexit ở pH=8",
+      "Có thể chuẩn độ trực tiếp Cu²⁺ với chỉ thị murexit ở pH<3"
+    ],
+    answer: 1,
+    explanation: "Khi chuẩn độ Cu²⁺ bằng EDTA với chỉ thị murexit, màu chuyển từ vàng (phức CuY) sang tím (murexit tự do), không phải xanh tím."
+  },
+
+  // BÀI 4: COMPLEXON NÂNG CAO
+  {
+    topic: "Bài 4 – Complexon (Ngược/Thay thế)",
+    text: "Trong phương pháp chuẩn độ thay thế xác định hàm lượng M²⁺ theo phương trình Mg-EDTA + M²⁺ → M-EDTA + Mg²⁺, phức của M-EDTA cần có điều kiện gì?",
+    options: [
+      "Phức M-EDTA phải bền bằng phức của Mg-EDTA",
+      "Không cần điều kiện gì về hằng số bền",
+      "Phức M-EDTA phải bền hơn so với phức Mg-EDTA",
+      "Phức M-EDTA phải kém bền hơn so với phức Mg-EDTA"
+    ],
+    answer: 2,
+    explanation: "Để phản ứng thay thế xảy ra (M²⁺ đẩy Mg²⁺ ra khỏi Mg-EDTA), phức M-EDTA phải bền hơn Mg-EDTA."
+  },
+  {
+    topic: "Bài 4 – Complexon (Ngược/Thay thế)",
+    text: "Phương pháp chuẩn độ ngược không được sử dụng trong trường hợp nào?",
+    options: [
+      "Các phản ứng xảy ra theo hệ số tỷ lượng xác định",
+      "Không tìm được chất chỉ thị thích hợp để chuẩn độ",
+      "Phản ứng giữa ion kim loại với EDTA xảy ra chậm",
+      "Không tìm được pH thích hợp để tạo phức hoàn toàn"
+    ],
+    answer: 0,
+    explanation: "Khi phản ứng xảy ra theo hệ số tỷ lượng xác định, có thể dùng chuẩn độ trực tiếp – không cần thiết phải dùng chuẩn độ ngược."
+  },
+
+  // BÀI 5: KẾT TỦA
+  {
+    topic: "Bài 5 – Kết Tủa",
+    text: "Điều kiện nào sau đây KHÔNG đúng với một phản ứng sử dụng được trong chuẩn độ kết tủa?",
+    options: [
+      "Có chỉ thị phù hợp để phát hiện điểm tương đương",
+      "Kết tủa phải thực tế không tan",
+      "Ảnh hưởng của hiện tượng cộng kết không đáng kể",
+      "Có thể kết tủa sau điểm tương đương hoặc hấp phụ"
+    ],
+    answer: 3,
+    explanation: "Điều kiện để dùng trong chuẩn độ kết tủa là kết tủa không được xảy ra sau điểm tương đương hoặc hấp phụ quá nhiều – đây là điều kiện BẮT BUỘC, không phải điều kiện được phép."
+  },
+  {
+    topic: "Bài 5 – Kết Tủa",
+    text: "Phương pháp Mohr được thực hiện trong môi trường nào?",
+    options: [
+      "pH > 11",
+      "6,5 < pH < 10",
+      "3 < pH < 7",
+      "pH < 2"
+    ],
+    answer: 1,
+    explanation: "Phương pháp Mohr cần môi trường trung tính đến kiềm yếu (6,5 < pH < 10) để chỉ thị K₂CrO₄ hoạt động chính xác."
+  },
+  {
+    topic: "Bài 5 – Kết Tủa",
+    text: "Phương pháp Volhard sử dụng chất nào làm chỉ thị?",
+    options: [
+      "K₂CrO₄",
+      "Hồ tinh bột",
+      "Fe³⁺",
+      "Eosin"
+    ],
+    answer: 2,
+    explanation: "Phương pháp Volhard sử dụng Fe³⁺ làm chỉ thị. Khi dư SCN⁻, SCN⁻ + Fe³⁺ → FeSCN²⁺ màu đỏ đậm là điểm cuối."
+  },
+  {
+    topic: "Bài 5 – Kết Tủa",
+    text: "Tại sao trong chuẩn độ Cl⁻ bằng phương pháp Volhard phải bỏ kết tủa AgCl trước khi chuẩn độ ngược Ag⁺ dư bằng SCN⁻?",
+    options: [
+      "Để tránh màu kết tủa lẫn nhau, khó nhìn ra điểm tương đương",
+      "Vì AgCl tan ra trong quá trình chuẩn độ",
+      "Vì màu sắc dung dịch thay đổi theo lượng kết tủa AgCl",
+      "Vì bị ảnh hưởng lẫn nhau trong khi chuẩn độ"
+    ],
+    answer: 1,
+    explanation: "Nếu không bỏ kết tủa AgCl, SCN⁻ + AgCl ⇌ AgSCN + Cl⁻ xảy ra vì AgSCN ít tan hơn AgCl, làm sai kết quả."
+  },
+
+  // BÀI 6: PERMANGANAT
+  {
+    topic: "Bài 6 – Permanganat",
+    text: "Muốn xác định được tổng hàm lượng Fe trong mẫu quặng bằng phương pháp permanganat thì cách làm nào sau đây là đúng?",
+    options: [
+      "Oxi hóa Fe³⁺ thành Fe²⁺ bằng Zn và chuẩn độ với KMnO₄",
+      "Khử Fe³⁺ xuống Fe²⁺ bằng SnCl₂ và chuẩn độ với KMnO₄",
+      "Oxi hóa Fe²⁺ thành Fe³⁺ và chuẩn độ Fe³⁺ bằng EDTA",
+      "Oxi hóa Fe³⁺ thành Fe²⁺ bằng Zn và chuẩn độ Fe²⁺ bằng KMnO₄"
+    ],
+    answer: 1,
+    explanation: "Cần khử toàn bộ Fe³⁺ về Fe²⁺ bằng SnCl₂, sau đó chuẩn độ Fe²⁺ bằng KMnO₄ để xác định tổng Fe."
+  },
+  {
+    topic: "Bài 6 – Permanganat",
+    text: "Thành phần của hỗn hợp bảo vệ Zimmermann dùng trong phép chuẩn độ Fe²⁺ bằng KMnO₄ trong môi trường HCl là gì?",
+    options: [
+      "H₂SO₄ + H₃PO₄ + MnSO₄",
+      "HCl + H₃PO₄ + MnSO₄",
+      "CH₃COOH + H₃PO₄ + MnSO₄",
+      "H₂SO₄ + H₃PO₄ + HCl"
+    ],
+    answer: 1,
+    explanation: "Hỗn hợp bảo vệ Zimmermann trong môi trường HCl gồm HCl + H₃PO₄ (tạo phức không màu với Fe³⁺) + MnSO₄ (tăng [Mn²⁺] tránh MnO₄⁻ oxi hóa Cl⁻)."
+  },
+  {
+    topic: "Bài 6 – Permanganat",
+    text: "Nhận xét nào sau đây KHÔNG phải là ưu điểm của phương pháp KMnO₄?",
+    options: [
+      "Không độc hại",
+      "Là chất oxi hóa mạnh",
+      "Không phải chất gốc",
+      "KMnO₄ rẻ tiền"
+    ],
+    answer: 2,
+    explanation: "KMnO₄ không phải chất gốc (không đủ tinh khiết, dễ bị phân hủy) – đây là NHƯỢC ĐIỂM, không phải ưu điểm."
+  },
+
+  // BÀI 7: DICROMAT
+  {
+    topic: "Bài 7 – Dicromat",
+    text: "Chất nào dưới đây có thể sử dụng làm chất gốc trong chuẩn độ oxi hóa-khử?",
+    options: [
+      "KMnO₄, K₂Cr₂O₇",
+      "K₂Cr₂O₇ và H₂C₂O₄·2H₂O",
+      "NaOH, KIO₃",
+      "KMnO₄, kali hidro phtalat"
+    ],
+    answer: 1,
+    explanation: "K₂Cr₂O₇ và H₂C₂O₄·2H₂O đều là chất gốc trong chuẩn độ oxi hóa khử vì bền và có độ tinh khiết cao."
+  },
+  {
+    topic: "Bài 7 – Dicromat",
+    text: "Trong phương pháp chuẩn độ dicromat, môi trường pH nào được sử dụng?",
+    options: [
+      "Kiềm mạnh",
+      "Kiềm yếu",
+      "Mọi môi trường",
+      "Acid mạnh"
+    ],
+    answer: 3,
+    explanation: "Phương pháp dicromat cần môi trường acid mạnh (H₂SO₄) để phản ứng oxi hóa khử xảy ra hoàn toàn và tạo Cr³⁺."
+  },
+
+  // BÀI 8: IOT-THIOSUNFAT
+  {
+    topic: "Bài 8 – Iot-Thiosunfat",
+    text: "Chất chỉ thị nào được dùng trong phương pháp chuẩn độ iot-thiosunfat?",
+    options: [
+      "Diphenylamin",
+      "Axit phenylantranilic",
+      "ETOO",
+      "Ferroin",
+      "Hồ tinh bột"
+    ],
+    answer: 4,
+    explanation: "Hồ tinh bột được dùng làm chỉ thị trong phương pháp iot-thiosunfat – nó hấp phụ I₂ tạo màu xanh đặc trưng, mất màu khi hết I₂."
+  },
+  {
+    topic: "Bài 8 – Iot-Thiosunfat",
+    text: "Điều kiện tối ưu để tiến hành chuẩn độ I₂ bằng Na₂S₂O₃ với chỉ thị hồ tinh bột là:",
+    options: [
+      "pH = 6-10",
+      "Chuẩn độ ở nhiệt độ phòng",
+      "Cả 1 và 2: tiến hành ở nhiệt độ phòng, pH 6-10, chuẩn đến màu vàng rơm mới cho HTB",
+      "Đun nóng dung dịch"
+    ],
+    answer: 2,
+    explanation: "Điều kiện tối ưu: nhiệt độ phòng (I₂ không bay hơi), pH 6-10 (tránh kiềm mạnh/axit mạnh), thêm HTB khi gần hết I₂ (màu vàng rơm)."
+  },
+  {
+    topic: "Bài 8 – Iot-Thiosunfat",
+    text: "Chất nào là chất gốc được sử dụng để chuẩn độ lại nồng độ dung dịch thiosunfat?",
+    options: [
+      "KMnO₄",
+      "K₂Cr₂O₇",
+      "I₂",
+      "EDTA",
+      "KI"
+    ],
+    answer: 1,
+    explanation: "K₂Cr₂O₇ là chất gốc dùng để chuẩn độ lại nồng độ Na₂S₂O₃ (thiosunfat không phải chất gốc)."
+  },
+
+  // BÀI 9: XI MĂNG
+  {
+    topic: "Bài 9 – Xi Măng",
+    text: "Trong phép xác định Fe₂O₃ trong mẫu xi măng, tại sao có thể chuẩn độ trực tiếp Fe³⁺ mà không cần phải tách loại các ion khác?",
+    options: [
+      "Vì Fe³⁺ tạo phức màu với chỉ thị axit sunfosalixylic",
+      "Tại pH=1,5-1,6 chỉ có Fe³⁺ tạo phức bền với EDTA",
+      "Trong dung dịch Fe³⁺ có mặt phần Fe²⁺ nên dễ dàng chuẩn độ",
+      "Nồng độ Fe³⁺ quá lớn nên không bị ảnh hưởng"
+    ],
+    answer: 1,
+    explanation: "Ở pH=1,5-1,6, chỉ có Fe³⁺ tạo phức bền với EDTA, còn Al³⁺, Ca²⁺, Mg²⁺ chưa tạo phức hoàn toàn nên không cần tách loại."
+  },
+  {
+    topic: "Bài 9 – Xi Măng",
+    text: "Khi tách loại nhôm sắt ra khỏi dung dịch để xác định Ca, Mg, tại sao phải lọc rửa kết tủa, hòa tan kết tủa bằng HCl rồi lại kết tủa lại?",
+    options: [
+      "Để phản ứng tạo kết tủa xảy ra hoàn toàn hơn",
+      "Để đảm bảo kết tủa không tan trong dung dịch",
+      "Vì kết tủa vô định hình có khả năng hấp phụ ion Ca, Mg nên cần hòa tan để thu lại toàn bộ",
+      "Để loại bỏ tạp chất từ thuốc thử"
+    ],
+    answer: 2,
+    explanation: "Kết tủa Al(OH)₃, Fe(OH)₃ dạng vô định hình hấp phụ mạnh ion Ca²⁺, Mg²⁺. Phải hòa tan lại bằng HCl rồi kết tủa lần 2 để giải phóng Ca, Mg."
+  },
+
+  // BÀI 10: ĐỒNG THAU
+  {
+    topic: "Bài 10 – Đồng Thau",
+    text: "Trong phép xác định Cu²⁺ bằng phương pháp iot-thiosunfat, tại sao phải loại bỏ hết NO₃⁻?",
+    options: [
+      "Vì NO₃⁻ tạo phức với Cu²⁺",
+      "Vì NO₃⁻ là chất oxi hóa, gây ảnh hưởng đến I⁻ khử",
+      "Vì NO₃⁻ làm hồ tinh bột mất màu sớm",
+      "Vì NO₃⁻ phản ứng với thiosunfat"
+    ],
+    answer: 1,
+    explanation: "NO₃⁻ là chất oxi hóa, nếu còn trong dung dịch sẽ oxi hóa I⁻ tạo I₂ thêm, gây sai số dương. Loại bỏ bằng cách đun sôi dung dịch."
+  },
+  {
+    topic: "Bài 10 – Đồng Thau",
+    text: "Nhận xét nào sau đây là SAI khi nói về phương pháp dicromat xác định chì (Pb)?",
+    options: [
+      "Môi trường kết tủa là pH=5-6",
+      "Kết tủa chì bằng K₂Cr₂O₇ sẽ loại được ảnh hưởng của Ba²⁺",
+      "Khi hòa tan PbCrO₄ bằng hỗn hợp clorua (NaCl+HCl), crom ở dạng dicromat",
+      "1 mol Pb²⁺ cần 3 mol Fe²⁺ trong phản ứng chuẩn độ"
+    ],
+    answer: 3,
+    explanation: "Tất cả 4 nhận xét đều đúng theo tài liệu (đáp án 1,2,3,4). Câu hỏi này có đáp án là tất cả đúng."
+  }
+];
+
+let currentQ = 0;
+let score = 0;
+let answered = false;
+
+function startQuiz() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('q-total').textContent = QUESTIONS.length;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = QUESTIONS[currentQ];
+
+  document.getElementById('q-num').textContent = currentQ + 1;
+  document.getElementById('q-topic').textContent = q.topic;
+  document.getElementById('q-number-label').textContent = `Câu hỏi ${currentQ + 1}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('next-btn').style.display = 'none';
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+  fb.style.display = 'none';
+
+  // Progress
+  const pct = (currentQ / QUESTIONS.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // Options
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-label">${labels[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i, btn);
+    list.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx, btn) {
+  if (answered) return;
+  answered = true;
+
+  const q = QUESTIONS[currentQ];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('feedback-box');
+
+  if (idx === q.answer) {
+    btn.classList.add('correct');
+    score++;
+    fb.className = 'feedback-box correct';
+    document.getElementById('feedback-title').innerHTML = '✅ Chính xác!';
+    document.getElementById('feedback-body').textContent = q.explanation;
+  } else {
+    btn.classList.add('wrong');
+    btns[q.answer].classList.add('reveal-correct');
+    fb.className = 'feedback-box wrong';
+    document.getElementById('feedback-title').innerHTML = '❌ Chưa đúng';
+    document.getElementById('feedback-body').textContent = q.explanation;
+  }
+
+  fb.style.display = 'block';
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('next-btn').style.display = 'inline-flex';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= QUESTIONS.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+  document.getElementById('progress-bar').style.width = '100%';
+
+  const total = QUESTIONS.length;
+  const wrong = total - score;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('stat-score').textContent = score;
+  document.getElementById('stat-wrong').textContent = wrong;
+  document.getElementById('stat-pct').textContent = pct + '%';
+
+  let emoji = '😔', title = 'Cần ôn thêm!', sub = 'Hãy xem lại bài và thử lại nhé.';
+  if (pct >= 90) { emoji = '🏆'; title = 'Xuất sắc!'; sub = 'Bạn nắm vững kiến thức rất tốt!'; }
+  else if (pct >= 70) { emoji = '🎉'; title = 'Khá tốt!'; sub = 'Còn một số điểm cần chú ý thêm.'; }
+  else if (pct >= 50) { emoji = '📚'; title = 'Trung bình'; sub = 'Hãy ôn lại các phần còn yếu.'; }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = `${score}/${total} câu đúng – ${sub}`;
+}
+
+function restartQuiz() {
+  currentQ = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('progress-bar').style.width = '0%';
+  renderQuestion();
+}
+</script>
+</body>
+</html>
